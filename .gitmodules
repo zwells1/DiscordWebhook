@@ -1,0 +1,3 @@
+[submodule "source/submodule/DiscordInfo"]
+	path = source/submodule/DiscordInfo
+	url = git@github.com:zwells1/DiscordInfo.git
