@@ -9,7 +9,11 @@ import json
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 class MidjourneyApi():
-    
+    #--------------------------------------------------------------------------
+    #--------------------------------------------------------------------------  
+    def get_session_id(self):
+        return ''.join([str(y) for x in range(32) for y in random.choice('0123456789abcdef')])
+
     #--------------------------------------------------------------------------
     #--------------------------------------------------------------------------    
     def __init__(self, prompt, application_id, guild_id, channel_id, version, id, authorization):
@@ -23,22 +27,23 @@ class MidjourneyApi():
         self.message_id = ""
         self.custom_id = ""
         self.image_path_str = ""
-        self.send_message()
-        #handle delays first then uncomment
-        #self.get_message()
-        #self.choose_images()
-        #self.download_image()
+        self.session_id = self.get_session_id()
+        self._rand_sleep()
+        self.send_imagine_message()
+        self.get_message()
+        self.choose_images()
+        self.download_image()
     
     #--------------------------------------------------------------------------
     #--------------------------------------------------------------------------
-    def send_message(self):
+    def send_imagine_message(self):
         url = "https://discord.com/api/v9/interactions"
         data = {
             "type": 2,
             "application_id": self.application_id,
             "guild_id": self.guild_id,
             "channel_id": self.channel_id,
-            "session_id": "cannot be empty",
+            "session_id": self.session_id,
             "data": {
                 "version": self.version,
                 "id": self.id,
@@ -79,6 +84,8 @@ class MidjourneyApi():
             'Content-Type': 'application/json',
         }
         response = requests.post(url, headers=headers, json=data)
+        #TO-DO: need to handle response and bail out if issue
+        print("done")
     
     #--------------------------------------------------------------------------
     #--------------------------------------------------------------------------
@@ -88,7 +95,7 @@ class MidjourneyApi():
             "Content-Type": "application/json",
         }
         for i in range(3):
-            time.sleep(30)
+            self._rand_sleep()
             try:
                 response = requests.get(f'https://discord.com/api/v9/channels/{self.channel_id}/messages', headers=headers)
                 messages = response.json()
@@ -118,7 +125,7 @@ class MidjourneyApi():
             "message_flags": 0,
             "message_id": self.message_id,
             "application_id": self.application_id,
-            "session_id": "cannot be empty",
+            "session_id": self.session_id,
             "data": {
                 "component_type": 2,
                 "custom_id": self.custom_id,
@@ -134,7 +141,7 @@ class MidjourneyApi():
             "Content-Type": "application/json",
         }
         for i in range(3):
-            time.sleep(30)
+            self._rand_sleep()
             try:
                 response = requests.get(f'https://discord.com/api/v9/channels/{self.channel_id}/messages', headers=headers)
                 messages = response.json()
@@ -155,4 +162,10 @@ class MidjourneyApi():
     #--------------------------------------------------------------------------          
     def image_path(self):
         return self.image_path_str
+    
+    
+    #--------------------------------------------------------------------------
+    #--------------------------------------------------------------------------          
+    def _rand_sleep(self): 
+        time.sleep(round(random.uniform(20,80),2))
     
